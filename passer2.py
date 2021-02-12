@@ -8,9 +8,9 @@ import re
 from selenium import webdriver
 import comment_dmzj as dmzj
 
-classFirstUrl="http://manhua.dmzj.com/tags/category_search/0-0-0-all-0-1-0-1.shtml#category_nav_anchor"  
+classFirstUrl="http://manhua.dmzj1.com/tags/category_search/0-0-0-all-0-1-0-1.shtml#category_nav_anchor"  
 
-url1 = "http://manhua.dmzj.com"
+url1 = "http://manhua.dmzj1.com"
 
 class IllegalException(Exception):
     '''
@@ -31,7 +31,7 @@ def getHtml(url):
     except:
         return "产生异常,url="+url
 
-commicUrl = "http://manhua.dmzj.com/zaiyishijiebushibaideyibaizhongfangfa"
+commicUrl = "http://manhua.dmzj1.com/zaiyishijiebushibaideyibaizhongfangfa"
 
 #soup.find(id="xx") 查找文档发现BeautifulSoup 可以根据属性查找tag
 def getHrefCommentId(commicUrl):
@@ -94,6 +94,7 @@ def getAllPageUrlFunc(classFirstUrl, context, startPageNo, limitMaxPage, interva
     #print(html)
     soup = BeautifulSoup(html, "html.parser")
     t_minPage = 1
+    print("##########################fount", soup.find("span", "font14black"))
     maxPageStr = soup.find("span", "font14black").string
     print("maxPageStr=", maxPageStr)
     t_maxPage = int(re.search(r'\d+', maxPageStr).group(0))
