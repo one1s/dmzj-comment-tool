@@ -126,9 +126,9 @@ def commentFunc(comId, context, interval, cookieNo, imagineNameList):
         #http://comment.dmzj1.com/v1/4/add/web?callback=add_sucess&obj_id=58838&sender_ui
         r = requests.get(url="https://comment.dmzj.com/v1/4/add/web/", cookies = cookies, headers = headers, params = data) #, proxies = proxies #暂时不需要代理，好像是通过cookie限制
     except:
-        # cookies = {'cookie': cookieSet[(cookieNo+1)%len(cookieSet)]} #如果kookie过期引起异常，换下一个cookie
-        # r = requests.get(url="https://comment.dmzj.com/v1/4/add/web/", cookies = cookies, headers = headers, params = data)
-        raise IllegalException(url, headers+params)
+        cookies = {'cookie': cookieSet[(cookieNo+1)%len(cookieSet)]} #如果kookie过期引起异常，换下一个cookie
+        r = requests.get(url="https://comment.dmzj.com/v1/4/add/web/", cookies = cookies, headers = headers, params = data)
+        # raise IllegalException(url, headers+params)
     resultText = r.text
     print(resultText, r.status_code, comId)
     result = re.search('"code":0', resultText)
