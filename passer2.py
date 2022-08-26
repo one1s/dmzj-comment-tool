@@ -8,9 +8,9 @@ import re
 from selenium import webdriver
 import comment_dmzj as dmzj
 
-classFirstUrl="http://manhua.dmzj1.com/tags/category_search/0-0-0-all-0-1-0-1.shtml#category_nav_anchor"  
+# classFirstUrl="http://manhua.dmzj.com/tags/category_search/0-0-0-all-0-1-0-1.shtml#category_nav_anchor"  
 
-url1 = "http://manhua.dmzj1.com"
+url1 = "http://manhua.dmzj.com"
 
 class IllegalException(Exception):
     '''
@@ -31,7 +31,7 @@ def getHtml(url):
     except:
         return "产生异常,url="+url
 
-commicUrl = "http://manhua.dmzj1.com/zaiyishijiebushibaideyibaizhongfangfa"
+commicUrl = "http://manhua.dmzj.com/zaiyishijiebushibaideyibaizhongfangfa"
 
 #soup.find(id="xx") 查找文档发现BeautifulSoup 可以根据属性查找tag
 def getHrefCommentId(commicUrl):
@@ -45,7 +45,7 @@ def getHrefCommentId(commicUrl):
         print(comIdStr)
         return comIdStr
     else: 
-        raise IllegalException 
+        raise IllegalException(commicUrl,"subscribe_id")
 
 def getClassPageCommicIdSet(classFirstUrl, context, interval, imagineNameList):
     driver = webdriver.Chrome() 
@@ -54,35 +54,36 @@ def getClassPageCommicIdSet(classFirstUrl, context, interval, imagineNameList):
     html=driver.page_source
     driver.close()
     soup1=BeautifulSoup(html,'html.parser')
-    subTag = soup1.find("div", "tcaricature_block tcaricature_block2")
-    subTag2 = subTag.find_all("ul")
-    urlSet = []
-    acookieNo = 0
-    for url in subTag2:
-        subTag3 = url.find("a")
-        if subTag3 and subTag3.get("target") == "_blank":
-            subTag4 = subTag3.get("href")
-            if re.search(r'.html', subTag4):
-                urlSet.append(subTag4) 
-                try:
-                    id = getHrefCommentId(commicUrl)
-                    dmzj.commentFunc(id, context, interval, acookieNo, imagineNameList)
-                    acookieNo = acookieNo + 1
-                except IllegalException:
-                    print("exception IllegalException, commicUrl=", commicUrl)
-                
-            else: 
-                subTag5 = subTag4[0:len(subTag4)-1]
-                constructUrl = url1 + subTag5
-                #print(constructUrl)
-                urlSet.append(constructUrl)
-                try:
-                    id = getHrefCommentId(constructUrl)
-                    dmzj.commentFunc(id, context, interval, acookieNo, imagineNameList)
-                    acookieNo = acookieNo + 1
-                except IllegalException:
-                    print("exception IllegalException, constructUrl=", constructUrl)
-    print("url num=", len(urlSet))
+    subTag_block = soup1.find_all("div", "tcaricature_block tcaricature_block2")
+    url_num = 0
+    for subTag in subTag_block:
+        subTag2 = subTag.find_all("ul")
+        # urlSet = []
+        acookieNo = 0
+        for url in subTag2:
+            subTag3 = url.find("a")
+            if subTag3 and subTag3.get("target") == "_blank":
+                subTag4 = subTag3.get("href")
+                url_num = url_num + 1
+                if re.search(r'.html', subTag4):
+                    try:
+                        id = getHrefCommentId(commicUrl)
+                        dmzj.commentFunc(id, context, interval, acookieNo, imagineNameList)
+                        acookieNo = acookieNo + 1
+                    except IllegalException:
+                        print("exception IllegalException, commicUrl=", commicUrl)
+                    
+                else: 
+                    subTag5 = subTag4[0:len(subTag4)-1]
+                    constructUrl = url1 + subTag5
+                    #print(constructUrl)
+                    try:
+                        id = getHrefCommentId(constructUrl)
+                        dmzj.commentFunc(id, context, interval, acookieNo, imagineNameList)
+                        acookieNo = acookieNo + 1
+                    except IllegalException:
+                        print("exception IllegalException, constructUrl=", constructUrl)
+    print("url num=", url_num)
 
 
 def getAllPageUrlFunc(classFirstUrl, context, startPageNo, limitMaxPage, interval, imagineNameList):
@@ -106,7 +107,7 @@ def getAllPageUrlFunc(classFirstUrl, context, startPageNo, limitMaxPage, interva
     #遍历分类页获取动漫url和对应id
     while t_minPage <= int(t_maxPage):
         constructUrl = re.sub(r'\d+.shtml', str(t_minPage) + ".shtml", classFirstUrl)
-        print("constructUrl=", constructUrl, "t_minPage=", t_minPage)
+        print("constructUrl=", constructUrl, "t_minPage=", t_minPage, "context=", context)
         getClassPageCommicIdSet(constructUrl, context, interval, imagineNameList)
         t_minPage = t_minPage + 1
 

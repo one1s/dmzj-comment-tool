@@ -10,6 +10,17 @@ import uploadImagine
 
 cookies = ""
 comment = "djl cy pick who" 
+
+class IllegalException(Exception):
+    '''
+    Custom exception types
+    '''
+    def __init__(self, parameter, para_value):
+        err = 'The parameter "{0}" is not legal:{1}'.format(parameter, para_value)
+        Exception.__init__(self, err)
+        self.parameter = parameter
+        self.para_value = para_value
+
 agents = [
     "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:17.0; Baiduspider-ads) Gecko/17.0 Firefox/17.0",
     "Mozilla/5.0 (Linux; U; Android 2.3.6; en-us; Nexus S Build/GRK39F) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1",
@@ -113,10 +124,11 @@ def commentFunc(comId, context, interval, cookieNo, imagineNameList):
     r = ""
     try:
         #http://comment.dmzj1.com/v1/4/add/web?callback=add_sucess&obj_id=58838&sender_ui
-        r = requests.get(url="https://comment.dmzj1.com/v1/4/add/web/", cookies = cookies, headers = headers, params = data) #, proxies = proxies #暂时不需要代理，好像是通过cookie限制
+        r = requests.get(url="https://comment.dmzj.com/v1/4/add/web/", cookies = cookies, headers = headers, params = data) #, proxies = proxies #暂时不需要代理，好像是通过cookie限制
     except:
-        cookies = {'cookie': cookieSet[(cookieNo+1)%len(cookieSet)]} #如果kookie过期引起异常，换下一个cookie
-        r = requests.get(url="https://comment.dmzj1.com/v1/4/add/web/", cookies = cookies, headers = headers, params = data)
+        # cookies = {'cookie': cookieSet[(cookieNo+1)%len(cookieSet)]} #如果kookie过期引起异常，换下一个cookie
+        # r = requests.get(url="https://comment.dmzj.com/v1/4/add/web/", cookies = cookies, headers = headers, params = data)
+        raise IllegalException(url, headers+params)
     resultText = r.text
     print(resultText, r.status_code, comId)
     result = re.search('"code":0', resultText)
@@ -138,7 +150,7 @@ def commentFunc(comId, context, interval, cookieNo, imagineNameList):
         commentFunc(comId, context, interval, cookieNo, imagineNameList)
     elif not re.search('"code":1002', resultText): #不是重复评论
         time.sleep(interval)
-        print("not pass, index=", comId)
+        print("not pass, index=", comId, "resultText=", resultText)
         commentFunc(comId, context, interval, cookieNo, imagineNameList)
     else:
         print("direct pass result=", result)
